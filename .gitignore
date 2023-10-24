@@ -1,0 +1,7 @@
+./demo/*.o
+./demo/*.bin
+./demo/*.exe
+*.o
+*.bin
+*.exe
+
