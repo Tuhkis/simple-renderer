@@ -9,6 +9,14 @@ CC="cc"
 CFLAGS="-pipe -Ofast -ansi -Werror -Wpedantic -Wall -std=c89 -Wno-overlength-strings"
 LIBS="-lGL -ldl -lX11 -lXi -lm"
 
+if [ "$1" = "clean" ]; then
+  echo -e "${YELLOW}[CLEAN]${NORM} Removing binaries..."
+  rm *.o
+  rm *.bin
+  echo -e "${YELLOW}[CLEAN]${GREEN} Done.${NORM}"
+  exit 0
+fi
+
 function build_info {
   echo -e "${YELLOW}[BUILD]${NORM} $1"
 }
@@ -31,5 +39,7 @@ if ! $(${CC} *.o ${LIBS} -o demo.bin); then
   echo -e "${RED}[ERROR]${NORM} Couldn't link the demo."
   exit 1
 fi
-build_info "${YELLOW}Done.${NORM}"
+build_info "Stripping the demo..."
+strip demo.bin
+build_info "${GREEN}Done.${NORM}"
 

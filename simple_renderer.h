@@ -6,6 +6,12 @@
 #include "stddef.h"
 #include "stdio.h"
 
+#ifndef sr_offsetof
+#define sr_offsetof(type, member) offsetof(type, member)
+#endif /* sr_offsetof */
+
+#include "./glad/include/glad/glad.h"
+
 #define SR_MAX_TRIANGLES (2048)
 #define SR_MAX_VERTICES (SR_MAX_TRIANGLES * 3)
 
@@ -40,6 +46,9 @@ typedef struct sr_Renderer {
   unsigned int tex_count;
 } sr_Renderer;
 
+/**
+ * Returns an orthographic projection matrix.
+ */
 sr_Mat4 sr_mat4_ortho(float left, float right, float top, float bottom, float near, float far);
 /**
  * Creates a sr_Vec2 struct.
@@ -75,6 +84,10 @@ void sr_render_end(sr_Renderer* render);
  * will automatically flush itself and start rendering again.
  */
 void sr_render_push_triangle(sr_Renderer* renderer, sr_Vec2 a, sr_Vec2 b, sr_Vec2 c, sr_Vec4 a_c, sr_Vec4 b_c, sr_Vec4 c_c, sr_Vec2 a_uv, sr_Vec2 b_uv, sr_Vec2 c_uv, unsigned int texture);
+/**
+ * Pushes two triangles to the renderer, to make a rectangle.
+ */
+void sr_render_push_quad(sr_Renderer* render, sr_Vec2 pos, sr_Vec2 size, sr_Vec4 colour, unsigned int texture);
 /**
  * Resizes the renderer.
  */

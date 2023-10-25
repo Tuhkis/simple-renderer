@@ -1,6 +1,8 @@
 #include "simple_renderer.h"
 
-#include "./glad/include/glad/glad.h"
+#ifndef SR_NO_GLAD_IMPL
+#include "./glad/src/glad.c"
+#endif /* SR_NO_GLAD_IMPL */
 
 #define SR_INVALID_TEXTURE (1248)
 
@@ -40,14 +42,14 @@ void sr_init(sr_Renderer* render, unsigned short width, unsigned short height) {
   glBindBuffer(GL_ARRAY_BUFFER, render->vbo);
   glBufferData(GL_ARRAY_BUFFER, SR_MAX_VERTICES * sizeof(sr_RenderVertex),
     NULL, GL_DYNAMIC_DRAW);
-  glVertexAttribPointer(0, 2, GL_FLOAT, GL_FALSE, sizeof(sr_RenderVertex), (void*)offsetof(sr_RenderVertex, pos));
-	glEnableVertexAttribArray(0);
-	glVertexAttribPointer(1, 4, GL_FLOAT, GL_FALSE, sizeof(sr_RenderVertex), (void*)offsetof(sr_RenderVertex, colour));
-	glEnableVertexAttribArray(1);
-	glVertexAttribPointer(2, 2, GL_FLOAT, GL_FALSE, sizeof(sr_RenderVertex), (void*)offsetof(sr_RenderVertex, uv));
-	glEnableVertexAttribArray(2);
-	glVertexAttribPointer(3, 1, GL_FLOAT, GL_FALSE, sizeof(sr_RenderVertex), (void*)offsetof(sr_RenderVertex, tex_index));
-	glEnableVertexAttribArray(3);
+  glVertexAttribPointer(0, 2, GL_FLOAT, GL_FALSE, sizeof(sr_RenderVertex), (void*)sr_offsetof(sr_RenderVertex, pos));
+  glEnableVertexAttribArray(0);
+  glVertexAttribPointer(1, 4, GL_FLOAT, GL_FALSE, sizeof(sr_RenderVertex), (void*)sr_offsetof(sr_RenderVertex, colour));
+  glEnableVertexAttribArray(1);
+  glVertexAttribPointer(2, 2, GL_FLOAT, GL_FALSE, sizeof(sr_RenderVertex), (void*)sr_offsetof(sr_RenderVertex, uv));
+  glEnableVertexAttribArray(2);
+  glVertexAttribPointer(3, 1, GL_FLOAT, GL_FALSE, sizeof(sr_RenderVertex), (void*)sr_offsetof(sr_RenderVertex, tex_index));
+  glEnableVertexAttribArray(3);
 
   render->shaders = glCreateProgram();
   vertex_shader = glCreateShader(GL_VERTEX_SHADER);
@@ -100,7 +102,7 @@ void sr_init(sr_Renderer* render, unsigned short width, unsigned short height) {
   glEnable(GL_BLEND);
   glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
   glDisable(GL_DEPTH_TEST);
-	glEnable(GL_TEXTURE_2D);
+  glEnable(GL_TEXTURE_2D);
   return;
 }
 
@@ -186,6 +188,15 @@ void sr_render_push_triangle(sr_Renderer* render, sr_Vec2 a, sr_Vec2 b, sr_Vec2 
   return;
 }
 
+void sr_render_push_quad(sr_Renderer* render, sr_Vec2 pos, sr_Vec2 size, sr_Vec4 colour, unsigned int texture) {
+  sr_render_push_triangle(render, pos, sr_vec2(pos.x + size.x, pos.y), sr_vec2(pos.x, pos.y + size.y),
+    colour, colour, colour, sr_vec2(0, 0), sr_vec2(1, 0), sr_vec2(0, 1), texture);
+
+  sr_render_push_triangle(render, sr_vec2(pos.x + size.x, pos.y + size.y), sr_vec2(pos.x + size.x, pos.y), sr_vec2(pos.x, pos.y + size.y),
+    colour, colour, colour, sr_vec2(1, 1), sr_vec2(1, 0), sr_vec2(0, 1), texture);
+    
+  return;
+}
 
 sr_Vec2 sr_vec2(float x, float y) {
   sr_Vec2 ret;
@@ -207,14 +218,14 @@ unsigned int sr_get_white_texture() {
   /* Cache the value, so that the texture isn't created more than once. */
 	if (_sr_cached_white == 4096) {
 		unsigned int tex;
-		unsigned char image[4] = { 255, 255, 255 };
+		unsigned char image[3] = {255, 255, 255};
 		glGenTextures(1, &tex);
 		glBindTexture(GL_TEXTURE_2D, tex);
 		glTexImage2D(GL_TEXTURE_2D, 0, GL_RGB8, 1, 1, 0, GL_RGB, GL_UNSIGNED_BYTE, image);
-		glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR);
-		glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
-		glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_CLAMP_TO_EDGE);
-		glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_CLAMP_TO_EDGE);
+		/* glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_CLAMP_TO_EDGE);
+		glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_CLAMP_TO_EDGE); */
+		glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_NEAREST);
+    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_NEAREST);
 		_sr_cached_white = tex;
 	}
 	return _sr_cached_white;
