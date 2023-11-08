@@ -61,7 +61,7 @@ sr_Vec4 sr_vec4(float x, float y, float z, float w);
 /**
  * Returns the ID of a white texture.
  */
-unsigned int sr_get_white_texture();
+unsigned int sr_get_white_texture(void);
 /**
  * Uninitialises the renderer. Call at the end of your program.
  */

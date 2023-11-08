@@ -214,7 +214,7 @@ sr_Vec4 sr_vec4(float x, float y, float z, float w) {
   return ret;
 }
 
-unsigned int sr_get_white_texture() {
+unsigned int sr_get_white_texture(void) {
   /* Cache the value, so that the texture isn't created more than once. */
 	if (_sr_cached_white == 4096) {
 		unsigned int tex;
