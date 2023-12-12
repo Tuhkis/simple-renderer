@@ -1,5 +1,6 @@
 #define SR_NO_GLAD_IMPL
-#include "../simple_renderer.c"
+#define SR_IMPL
+#include "../simple_renderer.h"
 
 #include "math.h"
 #include "stdio.h"

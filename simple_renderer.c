@@ -1,4 +1,6 @@
+#ifndef SIMPLE_RENDERER_H
 #include "simple_renderer.h"
+#endif /* SIMPLE_RENDERER_H */
 
 #ifndef SR_NO_GLAD_IMPL
 #include "./glad/src/glad.c"

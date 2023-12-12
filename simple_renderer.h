@@ -93,5 +93,9 @@ void sr_render_push_quad(sr_Renderer* render, sr_Vec2 pos, sr_Vec2 size, sr_Vec4
  */
 void sr_resize(sr_Renderer* render, unsigned short width, unsigned short height);
 
+#ifdef SR_IMPL
+#include "./simple_renderer.c"
+#endif /* SR_IMPL */
+
 #endif /* SIMPLE_RENDERER_H */
 
