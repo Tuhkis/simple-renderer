@@ -36,7 +36,7 @@ void sr_init(sr_Renderer* render, unsigned short width, unsigned short height) {
   GLuint fragment_shader;
   int tex_loc;
   int textures[8] = { 0, 1, 2, 3, 4, 5, 6, 7 };
-  
+
   glGenVertexArrays(1, &render->vao);
   glBindVertexArray(render->vao);
 
@@ -163,29 +163,29 @@ void sr_render_push_triangle(sr_Renderer* render, sr_Vec2 a, sr_Vec2 b, sr_Vec2 
     tex_index = render->tex_count;
     ++render->tex_count;
   }
-  
+
   /* Flush renderer if need be. */
   if (render->triangle_count == SR_MAX_TRIANGLES || tex_index == SR_INVALID_TEXTURE) {
     sr_render_end(render);
     sr_render_begin(render);
   }
-  
+
   render->triangle_data[render->triangle_count * 3].pos = a;
   render->triangle_data[render->triangle_count * 3].colour = a_c;
   render->triangle_data[render->triangle_count * 3].uv = a_uv;
   render->triangle_data[render->triangle_count * 3].tex_index = (float)(tex_index);
-  
-  
+
+
   render->triangle_data[render->triangle_count * 3 + 1].pos = b;
   render->triangle_data[render->triangle_count * 3 + 1].colour = b_c;
   render->triangle_data[render->triangle_count * 3 + 1].uv = b_uv;
   render->triangle_data[render->triangle_count * 3 + 1].tex_index = (float)(tex_index);
-  
+
   render->triangle_data[render->triangle_count * 3 + 2].pos = c;
   render->triangle_data[render->triangle_count * 3 + 2].colour = c_c;
   render->triangle_data[render->triangle_count * 3 + 2].uv = c_uv;
   render->triangle_data[render->triangle_count * 3 + 2].tex_index = (float)(tex_index);
-  
+
   ++render->triangle_count;
   return;
 }
@@ -196,7 +196,7 @@ void sr_render_push_quad(sr_Renderer* render, sr_Vec2 pos, sr_Vec2 size, sr_Vec4
 
   sr_render_push_triangle(render, sr_vec2(pos.x + size.x, pos.y + size.y), sr_vec2(pos.x + size.x, pos.y), sr_vec2(pos.x, pos.y + size.y),
     colour, colour, colour, sr_vec2(1, 1), sr_vec2(1, 0), sr_vec2(0, 1), texture);
-    
+
   return;
 }
 
