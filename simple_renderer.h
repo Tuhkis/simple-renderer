@@ -30,11 +30,11 @@ typedef struct sr_RenderVertex {
 } sr_RenderVertex;
 
 typedef struct sr_Renderer {
-  /* OpenGL object */
+  /* OpenGL objects */
   unsigned int shaders;
   unsigned int vao;
   unsigned int vbo;
-  
+
   sr_Mat4 proj;
 
   /* The triangle data required for the rendering. */

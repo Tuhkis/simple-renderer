@@ -175,7 +175,6 @@ void sr_render_push_triangle(sr_Renderer* render, sr_Vec2 a, sr_Vec2 b, sr_Vec2 
   render->triangle_data[render->triangle_count * 3].uv = a_uv;
   render->triangle_data[render->triangle_count * 3].tex_index = (float)(tex_index);
 
-
   render->triangle_data[render->triangle_count * 3 + 1].pos = b;
   render->triangle_data[render->triangle_count * 3 + 1].colour = b_c;
   render->triangle_data[render->triangle_count * 3 + 1].uv = b_uv;
