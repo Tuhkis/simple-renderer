@@ -8,10 +8,10 @@
 
 #define SR_INVALID_TEXTURE (1248)
 
-static const char* vertex_source =
+static const char* default_vertex_source =
 #include "vertex.glsl"
 
-static const char* fragment_source =
+static const char* default_fragment_source =
 #include "fragment.glsl"
 
 static unsigned int _sr_cached_white = 4096;
@@ -31,29 +31,12 @@ sr_Mat4 sr_mat4_ortho(float left, float right, float top, float bottom, float ne
   return ret;
 }
 
-void sr_init(sr_Renderer* render, unsigned short width, unsigned short height) {
+const sr_ShaderProgram sr_shader_program_create(const char* vertex_source, const char* fragment_source) {
   GLuint vertex_shader;
   GLuint fragment_shader;
-  int tex_loc;
-  int textures[8] = { 0, 1, 2, 3, 4, 5, 6, 7 };
+  sr_ShaderProgram program;
 
-  glGenVertexArrays(1, &render->vao);
-  glBindVertexArray(render->vao);
-
-  glGenBuffers(1, &render->vbo);
-  glBindBuffer(GL_ARRAY_BUFFER, render->vbo);
-  glBufferData(GL_ARRAY_BUFFER, SR_MAX_VERTICES * sizeof(sr_RenderVertex),
-    NULL, GL_DYNAMIC_DRAW);
-  glVertexAttribPointer(0, 2, GL_FLOAT, GL_FALSE, sizeof(sr_RenderVertex), (void*)sr_offsetof(sr_RenderVertex, pos));
-  glEnableVertexAttribArray(0);
-  glVertexAttribPointer(1, 4, GL_FLOAT, GL_FALSE, sizeof(sr_RenderVertex), (void*)sr_offsetof(sr_RenderVertex, colour));
-  glEnableVertexAttribArray(1);
-  glVertexAttribPointer(2, 2, GL_FLOAT, GL_FALSE, sizeof(sr_RenderVertex), (void*)sr_offsetof(sr_RenderVertex, uv));
-  glEnableVertexAttribArray(2);
-  glVertexAttribPointer(3, 1, GL_FLOAT, GL_FALSE, sizeof(sr_RenderVertex), (void*)sr_offsetof(sr_RenderVertex, tex_index));
-  glEnableVertexAttribArray(3);
-
-  render->shaders = glCreateProgram();
+  program = glCreateProgram();
   vertex_shader = glCreateShader(GL_VERTEX_SHADER);
   fragment_shader = glCreateShader(GL_FRAGMENT_SHADER);
   glShaderSource(vertex_shader, 1, &vertex_source, NULL);
@@ -75,26 +58,50 @@ void sr_init(sr_Renderer* render, unsigned short width, unsigned short height) {
     glGetShaderiv(fragment_shader, GL_COMPILE_STATUS, &success);
     if(!success) {
       glGetShaderInfoLog(fragment_shader, 512, NULL, info_log);
-      printf("Couldn't compile fragment shader. %s%s",info_log, "\n");
+      printf("Couldn't compile fragment shader. %s%s", info_log, "\n");
     }
   }
-  glAttachShader(render->shaders, vertex_shader);
-  glAttachShader(render->shaders, fragment_shader);
-  glLinkProgram(render->shaders);
+  glAttachShader(program, vertex_shader);
+  glAttachShader(program, fragment_shader);
+  glLinkProgram(program);
   {
     int success;
     char info_log[512];
-    glGetProgramiv(render->shaders, GL_LINK_STATUS, &success);
+    glGetProgramiv(program, GL_LINK_STATUS, &success);
     if(!success) {
-      glGetProgramInfoLog(render->shaders, 512, NULL, info_log);
-      printf("Couldn't link shader program. %s%s",info_log, "\n");
+      glGetProgramInfoLog(program, 512, NULL, info_log);
+      printf("Couldn't link shader program. %s%s", info_log, "\n");
     }
   }
-  glDetachShader(render->shaders, vertex_shader);
-  glDetachShader(render->shaders, fragment_shader);
+  glDetachShader(program, vertex_shader);
+  glDetachShader(program, fragment_shader);
   glDeleteShader(vertex_shader);
   glDeleteShader(fragment_shader);
-  glUseProgram(render->shaders);
+  glUseProgram(program);
+  return program;
+}
+
+void sr_init(sr_Renderer* render, unsigned short width, unsigned short height) {
+  int tex_loc;
+  int textures[8] = { 0, 1, 2, 3, 4, 5, 6, 7 };
+
+  glGenVertexArrays(1, &render->vao);
+  glBindVertexArray(render->vao);
+
+  glGenBuffers(1, &render->vbo);
+  glBindBuffer(GL_ARRAY_BUFFER, render->vbo);
+  glBufferData(GL_ARRAY_BUFFER, SR_MAX_VERTICES * sizeof(sr_RenderVertex),
+    NULL, GL_DYNAMIC_DRAW);
+  glVertexAttribPointer(0, 2, GL_FLOAT, GL_FALSE, sizeof(sr_RenderVertex), (void*)sr_offsetof(sr_RenderVertex, pos));
+  glEnableVertexAttribArray(0);
+  glVertexAttribPointer(1, 4, GL_FLOAT, GL_FALSE, sizeof(sr_RenderVertex), (void*)sr_offsetof(sr_RenderVertex, colour));
+  glEnableVertexAttribArray(1);
+  glVertexAttribPointer(2, 2, GL_FLOAT, GL_FALSE, sizeof(sr_RenderVertex), (void*)sr_offsetof(sr_RenderVertex, uv));
+  glEnableVertexAttribArray(2);
+  glVertexAttribPointer(3, 1, GL_FLOAT, GL_FALSE, sizeof(sr_RenderVertex), (void*)sr_offsetof(sr_RenderVertex, tex_index));
+  glEnableVertexAttribArray(3);
+
+  render->shaders = sr_shader_program_create_default();
 
   sr_resize(render, width, height);
 
@@ -105,6 +112,9 @@ void sr_init(sr_Renderer* render, unsigned short width, unsigned short height) {
   glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
   glDisable(GL_DEPTH_TEST);
   glEnable(GL_TEXTURE_2D);
+
+  render->moment = 0;
+  render->previous_moment = -1;
   return;
 }
 
@@ -113,6 +123,10 @@ void sr_free(sr_Renderer* render) {
   glDeleteVertexArrays(1, &render->vao);
   glDeleteProgram(render->shaders);
   return;
+}
+
+const sr_ShaderProgram sr_shader_program_create_default(void) {
+  return sr_shader_program_create(default_vertex_source, default_fragment_source);
 }
 
 void sr_resize(sr_Renderer* render, unsigned short width, unsigned short height) {
@@ -131,20 +145,32 @@ void sr_render_begin(sr_Renderer* render) {
 }
 
 void sr_render_end(sr_Renderer* render) {
+  unsigned int i;
+  int moment;
+
   {
-    unsigned int i;
     for (i = 0; i < render->tex_count; ++i) {
       glActiveTexture(GL_TEXTURE0 + i);
       glBindTexture(GL_TEXTURE_2D, render->tex[i]);
     }
   }
 
-  glBindBuffer(GL_ARRAY_BUFFER, render->vbo);
-  glBufferSubData(GL_ARRAY_BUFFER, 0, render->triangle_count * 3 * sizeof(sr_RenderVertex),
-    render->triangle_data);
+  render->moment = 0;
+  for (i = 0; i < render->triangle_count * 3; ++i) {
+    moment = ((render->triangle_data[i].pos.y - render->triangle_data[i].pos.x) * 32014);
+    render->moment = (moment ^ render->moment ^ (int)(render->triangle_data[i].tex_index * 772213) ^ ((int)(render->triangle_data[i].uv.x - render->triangle_data[i].uv.y) * 22891)) * 321;
+  }
+
+  if (render->moment != render->previous_moment) {
+    glBindBuffer(GL_ARRAY_BUFFER, render->vbo);
+    glBufferSubData(GL_ARRAY_BUFFER, 0, render->triangle_count * 3 * sizeof(sr_RenderVertex),
+      render->triangle_data);
+    printf("aa\n");
+  } else printf("bb\n");
   glUseProgram(render->shaders);
   glBindVertexArray(render->vao);
   glDrawArrays(GL_TRIANGLES, 0, render->triangle_count * 3);
+  render->previous_moment = render->moment;
   return;
 }
 

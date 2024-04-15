@@ -17,21 +17,26 @@
 
 #define sr_load_loader(getProc) gladLoadGLES2Loader((GLADloadproc)(getProc));
 
-typedef struct sr_Vec2 { float x, y; } sr_Vec2;
-typedef struct sr_Vec4 { float x, y, z, w; } sr_Vec4;
+typedef struct sr_vec2 { float x, y; } sr_Vec2;
+typedef struct sr_vec4 { float x, y, z, w; } sr_Vec4;
 
-typedef struct sr_Mat4 { float a[4 * 4]; } sr_Mat4;
+typedef struct sr_mat4 { float a[4 * 4]; } sr_Mat4;
 
-typedef struct sr_RenderVertex {
+typedef unsigned int sr_ShaderProgram;
+
+typedef struct sr_render_vertex {
   sr_Vec2 pos;
   sr_Vec4 colour;
   sr_Vec2 uv;
   float tex_index;
 } sr_RenderVertex;
 
-typedef struct sr_Renderer {
+typedef struct sr_renderer {
+  /* Metadata */
+  int moment;
+  int previous_moment;
   /* OpenGL objects */
-  unsigned int shaders;
+  sr_ShaderProgram shaders;
   unsigned int vao;
   unsigned int vbo;
 
@@ -92,6 +97,14 @@ void sr_render_push_quad(sr_Renderer* render, sr_Vec2 pos, sr_Vec2 size, sr_Vec4
  * Resizes the renderer.
  */
 void sr_resize(sr_Renderer* render, unsigned short width, unsigned short height);
+/**
+ * Creates a shader program from specified vertex and fragment shader sources.
+ */
+const sr_ShaderProgram sr_shader_program_create(const char* vertex_source, const char* fragment_shader);
+/**
+ * Creates the default 2D rendering shaders-
+ */
+const sr_ShaderProgram sr_shader_program_create_default(void);
 
 #ifdef SR_IMPL
 #include "./simple_renderer.c"

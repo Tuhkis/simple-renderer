@@ -13,3 +13,4 @@
 "  v_uv = a_uv;\n"
 "  v_tex_index = a_tex_index;\n"
 "}\0";
+

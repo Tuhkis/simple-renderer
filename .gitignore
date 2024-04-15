@@ -1,6 +1,7 @@
-./demo/*.o
-./demo/*.bin
-./demo/*.exe
+demo/*.o
+demo/*.bin
+demo/*.exe
+demo/glfw-ez
 *.o
 *.bin
 *.exe

@@ -5,7 +5,7 @@ GREEN="\e[32m"
 YELLOW="\e[33m"
 NORM="\e[0m"
 
-CC="cc"
+CC="clang"
 CFLAGS="-pipe -Ofast -ansi -Werror -Wpedantic -Wall -std=c89 -Wno-overlength-strings"
 LIBS="-lGL -ldl -lX11 -lXi -lm"
 
