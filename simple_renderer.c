@@ -146,7 +146,6 @@ void sr_render_begin(sr_Renderer* render) {
 
 void sr_render_end(sr_Renderer* render) {
   unsigned int i;
-  int moment;
 
   {
     for (i = 0; i < render->tex_count; ++i) {
@@ -157,8 +156,7 @@ void sr_render_end(sr_Renderer* render) {
 
   render->moment = 0;
   for (i = 0; i < render->triangle_count * 3; ++i) {
-    moment = ((render->triangle_data[i].pos.y - render->triangle_data[i].pos.x) * 32014);
-    render->moment = (moment ^ render->moment ^ (int)(render->triangle_data[i].tex_index * 772213) ^ ((int)(render->triangle_data[i].uv.x - render->triangle_data[i].uv.y) * 22891)) * 321;
+    render->moment = (moment ^ render->moment ^ (int)(render->triangle_data[i].tex_index * 772213) ^ ((int)(render->triangle_data[i].uv.x - render->triangle_data[i].uv.y) * 22891) ^ (render->triangle_data[i].pos.y) * 32014) ^ (render->triangle_data[i].pos.x) * 71314 * 321;
   }
 
   if (render->moment != render->previous_moment) {
