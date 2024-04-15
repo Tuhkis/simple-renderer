@@ -165,8 +165,7 @@ void sr_render_end(sr_Renderer* render) {
     glBindBuffer(GL_ARRAY_BUFFER, render->vbo);
     glBufferSubData(GL_ARRAY_BUFFER, 0, render->triangle_count * 3 * sizeof(sr_RenderVertex),
       render->triangle_data);
-    printf("aa\n");
-  } else printf("bb\n");
+  }
   glUseProgram(render->shaders);
   glBindVertexArray(render->vao);
   glDrawArrays(GL_TRIANGLES, 0, render->triangle_count * 3);
