@@ -157,11 +157,11 @@ void sr_render_end(sr_Renderer* render) {
   render->moment = 0;
   for (i = 0; i < render->triangle_count * 3; ++i) {
     render->moment = (
-      (int)(render->triangle_data[i].pos.x * 31) ^
-      (int)(render->triangle_data[i].pos.y * 179) ^
+      (int)(render->triangle_data[i].pos.x * render->triangle_data[i].colour.x * 509) ^
+      (int)(render->triangle_data[i].pos.y * 9319) ^
       (int)(render->triangle_data[i].uv.x * 547) ^
-      (int)(render->triangle_data[i].uv.y * 353) ^
-      (int)(render->triangle_data[i].tex_index * 211) ^
+      (int)(render->triangle_data[i].uv.y * 87803) ^
+      (int)(render->triangle_data[i].tex_index * 2221) ^
       (int)(render->triangle_data[i].colour.y * 773)
     ) * 859;
   }
